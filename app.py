@@ -31,10 +31,15 @@ def manage_grant_id():
         new_grant_id = data.get('grant_id', '')
         if new_grant_id:
             app.config['CURRENT_GRANT_ID'] = new_grant_id
+            
+            # Test the connection with the new grant ID
+            connection_status = test_connection_status(new_grant_id)
+            
             return jsonify({
                 'success': True,
                 'grant_id': app.config['CURRENT_GRANT_ID'],
-                'message': 'Grant ID updated successfully'
+                'message': 'Grant ID updated successfully',
+                'connection': connection_status
             })
         else:
             return jsonify({
@@ -43,6 +48,62 @@ def manage_grant_id():
             }), 400
     
     return jsonify({'grant_id': app.config['CURRENT_GRANT_ID']})
+
+def test_connection_status(grant_id):
+    """Test connection to the mail server using the grant ID"""
+    try:
+        # Try to fetch folders to test the connection
+        # Returns tuple: (folders, request_id, next_cursor) - we only need folders
+        folders, *_ = nylas.folders.list(identifier=grant_id)
+        return {
+            'success': True,
+            'message': 'Connection successful'
+        }
+    except Exception as e:
+        return {
+            'success': False,
+            'message': f'Connection failed: {str(e)}'
+        }
+
+@app.route('/api/folders', methods=['GET'])
+def get_folders():
+    """List all folders/mailboxes for the current grant ID"""
+    if not app.config['CURRENT_GRANT_ID']:
+        return jsonify({
+            'success': False,
+            'message': 'Grant ID not set. Please configure it first.'
+        }), 400
+    
+    try:
+        # Fetch folders using Nylas API
+        # Returns tuple: (folders, request_id, next_cursor) - we only need folders
+        folders, *_ = nylas.folders.list(
+            identifier=app.config['CURRENT_GRANT_ID']
+        )
+        
+        # Parse and format folder data
+        folder_list = []
+        for folder in folders:
+            folder_data = {
+                'id': folder.id,
+                'name': folder.name,
+                'total_count': getattr(folder, 'total_count', 0),
+                'unread_count': getattr(folder, 'unread_count', 0),
+                'parent_id': getattr(folder, 'parent_id', None)
+            }
+            folder_list.append(folder_data)
+        
+        return jsonify({
+            'success': True,
+            'count': len(folder_list),
+            'folders': folder_list
+        })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Error fetching folders: {str(e)}'
+        }), 500
 
 @app.route('/api/emails', methods=['GET'])
 def get_emails():
