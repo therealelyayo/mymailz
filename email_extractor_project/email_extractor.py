@@ -3,11 +3,11 @@ import email
 import re
 import socket
 from email.header import decode_header
-
-# Email server details (example for Gmail; adjust for your provider)
+ Email server details
 IMAP_SERVER = 'imap.yandex.com'
-USERNAME = 'snowj1917@yandex.com'  # Replace with your email
-PASSWORD = 'lxvvishpplanixuj'     # Use an app password, not your main password
+USERNAME = 'weder@yandex.com'
+PASSWORD = 'lxvviereshpplanixuj'
+ Use an app password, not your main password
 
 # Set socket timeout to prevent hanging
 socket.setdefaulttimeout(30)
