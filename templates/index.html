@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyMailz - Email Query Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .section h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .current-grant {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .current-grant strong {
+            color: #667eea;
+        }
+        
+        .email-list {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .email-item {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .email-item:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .email-item.unread {
+            border-left: 4px solid #667eea;
+            background: #f8f9ff;
+        }
+        
+        .email-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .email-subject {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 8px;
+        }
+        
+        .email-from {
+            color: #667eea;
+            font-weight: 500;
+        }
+        
+        .email-date {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .email-snippet {
+            color: #6c757d;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        
+        .badge.unread {
+            background: #667eea;
+            color: white;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .query-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .email-count {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            overflow: auto;
+        }
+        
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 20px;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        .email-body {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📧 MyMailz</h1>
+            <p>Email Query Interface powered by Nylas API</p>
+        </div>
+        
+        <div class="content">
+            <!-- Grant ID Management Section -->
+            <div class="section">
+                <h2>🔑 Grant ID Configuration</h2>
+                <div id="grantAlert" class="alert"></div>
+                <div class="current-grant">
+                    <strong>Current Grant ID:</strong> <span id="currentGrantId">{{ grant_id or 'Not set' }}</span>
+                </div>
+                <div class="form-group">
+                    <label for="grantIdInput">Update Grant ID:</label>
+                    <input type="text" id="grantIdInput" placeholder="Enter new grant ID" value="{{ grant_id }}">
+                </div>
+                <button onclick="updateGrantId()">Update Grant ID</button>
+            </div>
+            
+            <!-- Email Query Section -->
+            <div class="section">
+                <h2>🔍 Query Emails</h2>
+                <div id="emailAlert" class="alert"></div>
+                
+                <div class="query-controls">
+                    <div class="form-group">
+                        <label for="limitInput">Limit:</label>
+                        <input type="number" id="limitInput" value="20" min="1" max="100">
+                    </div>
+                    <div class="form-group">
+                        <label for="subjectInput">Subject (optional):</label>
+                        <input type="text" id="subjectInput" placeholder="Filter by subject">
+                    </div>
+                    <div class="form-group">
+                        <label for="fromInput">From (optional):</label>
+                        <input type="text" id="fromInput" placeholder="Filter by sender email">
+                    </div>
+                </div>
+                
+                <button onclick="queryEmails()">🔍 Query Emails</button>
+                
+                <div id="emailResults" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Email Detail Modal -->
+    <div id="emailModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="emailDetail"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Update Grant ID
+        async function updateGrantId() {
+            const grantId = document.getElementById('grantIdInput').value.trim();
+            const alertDiv = document.getElementById('grantAlert');
+            
+            if (!grantId) {
+                showAlert(alertDiv, 'error', 'Please enter a grant ID');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/grant-id', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ grant_id: grantId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('currentGrantId').textContent = data.grant_id;
+                    showAlert(alertDiv, 'success', data.message);
+                } else {
+                    showAlert(alertDiv, 'error', data.message);
+                }
+            } catch (error) {
+                showAlert(alertDiv, 'error', 'Error updating grant ID: ' + error.message);
+            }
+        }
+        
+        // Query Emails
+        async function queryEmails() {
+            const limit = document.getElementById('limitInput').value;
+            const subject = document.getElementById('subjectInput').value.trim();
+            const from = document.getElementById('fromInput').value.trim();
+            const resultsDiv = document.getElementById('emailResults');
+            const alertDiv = document.getElementById('emailAlert');
+            
+            // Clear previous alerts
+            alertDiv.style.display = 'none';
+            
+            // Show loading
+            resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading emails...</p></div>';
+            
+            try {
+                let url = `/api/emails?limit=${limit}`;
+                if (subject) url += `&subject=${encodeURIComponent(subject)}`;
+                if (from) url += `&from=${encodeURIComponent(from)}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayEmails(data.emails, data.count);
+                } else {
+                    resultsDiv.innerHTML = '';
+                    showAlert(alertDiv, 'error', data.message);
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = '';
+                showAlert(alertDiv, 'error', 'Error fetching emails: ' + error.message);
+            }
+        }
+        
+        // Display Emails
+        function displayEmails(emails, count) {
+            const resultsDiv = document.getElementById('emailResults');
+            
+            if (emails.length === 0) {
+                resultsDiv.innerHTML = '<div class="loading"><p>No emails found</p></div>';
+                return;
+            }
+            
+            let html = `<div class="email-count">Found ${count} email${count !== 1 ? 's' : ''}</div>`;
+            html += '<div class="email-list">';
+            
+            emails.forEach(email => {
+                const fromName = email.from.length > 0 ? 
+                    (email.from[0].name || email.from[0].email) : 'Unknown';
+                const unreadClass = email.unread ? 'unread' : '';
+                const unreadBadge = email.unread ? '<span class="badge unread">Unread</span>' : '';
+                
+                html += `
+                    <div class="email-item ${unreadClass}" onclick="showEmailDetail('${email.id}')">
+                        <div class="email-header">
+                            <div>
+                                <div class="email-subject">${escapeHtml(email.subject)}</div>
+                                <div class="email-from">From: ${escapeHtml(fromName)}</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div class="email-date">${email.date_formatted}</div>
+                                ${unreadBadge}
+                            </div>
+                        </div>
+                        <div class="email-snippet">${escapeHtml(email.snippet)}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+        
+        // Show Email Detail
+        async function showEmailDetail(emailId) {
+            const modal = document.getElementById('emailModal');
+            const detailDiv = document.getElementById('emailDetail');
+            
+            modal.style.display = 'block';
+            detailDiv.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading email details...</p></div>';
+            
+            try {
+                const response = await fetch(`/api/email/${emailId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const email = data.email;
+                    const fromList = email.from.map(f => `${f.name || ''} &lt;${f.email}&gt;`).join(', ');
+                    const toList = email.to.map(t => `${t.name || ''} &lt;${t.email}&gt;`).join(', ');
+                    
+                    let html = `
+                        <h2>${escapeHtml(email.subject)}</h2>
+                        <div style="margin: 15px 0; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                            <p><strong>From:</strong> ${fromList}</p>
+                            <p><strong>To:</strong> ${toList}</p>
+                            ${email.cc.length > 0 ? `<p><strong>CC:</strong> ${email.cc.map(c => `${c.name || ''} &lt;${c.email}&gt;`).join(', ')}</p>` : ''}
+                            <p><strong>Date:</strong> ${email.date_formatted}</p>
+                        </div>
+                        <div class="email-body">${escapeHtml(email.body)}</div>
+                    `;
+                    
+                    detailDiv.innerHTML = html;
+                } else {
+                    detailDiv.innerHTML = `<div class="alert error">${data.message}</div>`;
+                }
+            } catch (error) {
+                detailDiv.innerHTML = `<div class="alert error">Error loading email: ${error.message}</div>`;
+            }
+        }
+        
+        // Close Modal
+        function closeModal() {
+            document.getElementById('emailModal').style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('emailModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Helper Functions
+        function showAlert(element, type, message) {
+            element.className = `alert ${type}`;
+            element.textContent = message;
+            element.style.display = 'block';
+            
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Load grant ID on page load
+        window.onload = function() {
+            fetch('/api/grant-id')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.grant_id) {
+                        document.getElementById('currentGrantId').textContent = data.grant_id;
+                        document.getElementById('grantIdInput').value = data.grant_id;
+                    }
+                })
+                .catch(error => console.error('Error loading grant ID:', error));
+        };
+    </script>
+</body>
+</html>
