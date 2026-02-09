@@ -245,6 +245,16 @@
             margin-bottom: 15px;
         }
         
+        .folder-count-banner {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
         .email-count {
             background: #667eea;
             color: white;
@@ -462,7 +472,8 @@
                     if (data.connection) {
                         displayConnectionStatus(connectionStatusDiv, data.connection);
                         
-                        // If connection is successful, automatically load folders
+                        // If connection is successful, automatically load folders after a brief delay
+                        // to allow user to see the success message first
                         if (data.connection.success) {
                             setTimeout(() => loadFolders(), 500);
                         }
@@ -527,7 +538,7 @@
                 return;
             }
             
-            let html = `<div class="email-count">Found ${count} folder${count !== 1 ? 's' : ''}</div>`;
+            let html = `<div class="folder-count-banner">Found ${count} folder${count !== 1 ? 's' : ''}</div>`;
             html += '<div class="folder-list">';
             
             folders.forEach(folder => {

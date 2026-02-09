@@ -53,7 +53,8 @@ def test_connection_status(grant_id):
     """Test connection to the mail server using the grant ID"""
     try:
         # Try to fetch folders to test the connection
-        folders, _, _ = nylas.folders.list(identifier=grant_id)
+        # Returns tuple: (folders, request_id, next_cursor) - we only need folders
+        folders, *_ = nylas.folders.list(identifier=grant_id)
         return {
             'success': True,
             'message': 'Connection successful'
@@ -75,7 +76,8 @@ def get_folders():
     
     try:
         # Fetch folders using Nylas API
-        folders, _, _ = nylas.folders.list(
+        # Returns tuple: (folders, request_id, next_cursor) - we only need folders
+        folders, *_ = nylas.folders.list(
             identifier=app.config['CURRENT_GRANT_ID']
         )
         
