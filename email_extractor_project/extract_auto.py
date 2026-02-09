@@ -7,8 +7,8 @@ import sys
 
 # Email server details
 IMAP_SERVER = 'imap.yandex.com'
-USERNAME = 'snowj1917@yandex.com'
-PASSWORD = 'lxvvishpplanixuj'
+USERNAME = 'weder@yandex.com'
+PASSWORD = 'lxvviereshpplanixuj'
 
 # Set socket timeout to prevent hanging
 socket.setdefaulttimeout(30)
