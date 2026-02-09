@@ -208,4 +208,6 @@ def get_email_detail(email_id):
         }), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Run in debug mode only if DEBUG environment variable is set
+    debug_mode = os.getenv('DEBUG', 'False').lower() in ('true', '1', 'yes')
+    app.run(debug=debug_mode, host='0.0.0.0', port=5000)
