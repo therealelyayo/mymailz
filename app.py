@@ -15,27 +15,25 @@ nylas = Client(
     api_uri=os.getenv('NYLAS_API_URI', 'https://api.us.nylas.com')
 )
 
-# Store current grant_id (can be changed via API)
-current_grant_id = os.getenv('NYLAS_GRANT_ID', '')
+# Store current grant_id in app config (thread-safe)
+app.config['CURRENT_GRANT_ID'] = os.getenv('NYLAS_GRANT_ID', '')
 
 @app.route('/')
 def index():
     """Render the main web UI"""
-    return render_template('index.html', grant_id=current_grant_id)
+    return render_template('index.html', grant_id=app.config['CURRENT_GRANT_ID'])
 
 @app.route('/api/grant-id', methods=['GET', 'POST'])
 def manage_grant_id():
     """Get or update the grant ID"""
-    global current_grant_id
-    
     if request.method == 'POST':
         data = request.get_json()
         new_grant_id = data.get('grant_id', '')
         if new_grant_id:
-            current_grant_id = new_grant_id
+            app.config['CURRENT_GRANT_ID'] = new_grant_id
             return jsonify({
                 'success': True,
-                'grant_id': current_grant_id,
+                'grant_id': app.config['CURRENT_GRANT_ID'],
                 'message': 'Grant ID updated successfully'
             })
         else:
@@ -44,12 +42,12 @@ def manage_grant_id():
                 'message': 'Grant ID cannot be empty'
             }), 400
     
-    return jsonify({'grant_id': current_grant_id})
+    return jsonify({'grant_id': app.config['CURRENT_GRANT_ID']})
 
 @app.route('/api/emails', methods=['GET'])
 def get_emails():
     """Query emails using Nylas API"""
-    if not current_grant_id:
+    if not app.config['CURRENT_GRANT_ID']:
         return jsonify({
             'success': False,
             'message': 'Grant ID not set. Please configure it first.'
@@ -73,7 +71,7 @@ def get_emails():
         
         # Fetch messages using Nylas API
         messages, _, _ = nylas.messages.list(
-            identifier=current_grant_id,
+            identifier=app.config['CURRENT_GRANT_ID'],
             query_params=query_params
         )
         
@@ -132,7 +130,7 @@ def get_emails():
 @app.route('/api/email/<email_id>', methods=['GET'])
 def get_email_detail(email_id):
     """Get detailed information about a specific email"""
-    if not current_grant_id:
+    if not app.config['CURRENT_GRANT_ID']:
         return jsonify({
             'success': False,
             'message': 'Grant ID not set. Please configure it first.'
@@ -141,7 +139,7 @@ def get_email_detail(email_id):
     try:
         # Fetch specific message
         message = nylas.messages.find(
-            identifier=current_grant_id,
+            identifier=app.config['CURRENT_GRANT_ID'],
             message_id=email_id
         )
         
